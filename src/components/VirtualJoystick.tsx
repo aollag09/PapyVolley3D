@@ -7,20 +7,11 @@ interface VirtualJoystickProps {
 }
 
 export default function VirtualJoystick({ onKeysChange, onJumpPress }: VirtualJoystickProps) {
-  // Only show joystick on touch devices
-  const [isTouchDevice, setIsTouchDevice] = useState(false)
-
-  useEffect(() => {
-    // Check if device supports touch
-    const hasTouch = () => {
-      return (
-        'ontouchstart' in window ||
-        navigator.maxTouchPoints > 0 ||
-        (navigator as any).msMaxTouchPoints > 0
-      )
-    }
-    setIsTouchDevice(hasTouch())
-  }, [])
+  // Check if device supports touch (not in state to avoid hook violations)
+  const isTouchDevice =
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0 ||
+    (navigator as any).msMaxTouchPoints > 0
 
   if (!isTouchDevice) {
     return null
