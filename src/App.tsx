@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useGameEngine } from './hooks/useGameEngine'
 import HUD from './components/HUD'
 import VirtualJoystick from './components/VirtualJoystick'
+import ConsoleOverlay from './components/ConsoleOverlay'
 import './App.css'
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
       <canvas ref={canvasRef} className="game-canvas" />
       <HUD status={status} onDifficulty={setDifficulty} />
       <VirtualJoystick onKeysChange={setJoystickKeys} onJumpPress={handleJoystickInput} />
+      <ConsoleOverlay />
     </div>
   )
 }
