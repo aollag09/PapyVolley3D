@@ -92,41 +92,9 @@ function makeNetTexture(): THREE.CanvasTexture {
   return new THREE.CanvasTexture(canvas)
 }
 
-function createPalmTree(position: THREE.Vector3): THREE.Group {
-  const tree = new THREE.Group()
-  tree.position.copy(position)
-
-  // Trunk
-  const trunkGeo = new THREE.CylinderGeometry(0.4, 0.5, 8, 8)
-  const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8b5a2b })
-  const trunk = new THREE.Mesh(trunkGeo, trunkMat)
-  trunk.position.y = 4
-  trunk.castShadow = true
-  tree.add(trunk)
-
-  // Foliage (sphere clusters)
-  const foliageColors = [0x2d5016, 0x3d6b1f, 0x4a7c2e]
-  for (let i = 0; i < 3; i++) {
-    const foliageGeo = new THREE.SphereGeometry(2.5, 8, 8)
-    const foliageMat = new THREE.MeshLambertMaterial({ color: foliageColors[i % 3] })
-    const foliage = new THREE.Mesh(foliageGeo, foliageMat)
-    foliage.position.set(
-      Math.cos((i / 3) * Math.PI * 2) * 1.2,
-      8 + i * 0.5,
-      Math.sin((i / 3) * Math.PI * 2) * 1.2
-    )
-    foliage.castShadow = true
-    tree.add(foliage)
-  }
-
-  return tree
-}
-
-
 export class Court {
   readonly object3D: THREE.Group
-  readonly ocean: THREE.Mesh | null
-
+  
   constructor() {
     this.object3D = new THREE.Group()
 
@@ -140,18 +108,8 @@ export class Court {
     floor.receiveShadow = true
     this.object3D.add(floor)
 
-    // Palmiers around the court
-    const palmPositions = [
-      new THREE.Vector3(-20, 0, -25),
-      new THREE.Vector3(20, 0, -25),
-      new THREE.Vector3(-25, 0, 25),
-      new THREE.Vector3(25, 0, 25),
-      new THREE.Vector3(-18, 0, 20),
-      new THREE.Vector3(18, 0, 20),
-    ]
-    for (const pos of palmPositions) {
-      this.object3D.add(createPalmTree(pos))
-    }
+   
+
 
     // ── Net ──────────────────────────────────────────────────────
     const netTex = makeNetTexture()
@@ -191,19 +149,4 @@ export class Court {
     }
   }
 
-  updateOcean(dt: number) {
-    if (!this.ocean) return
-    const time = ((this.ocean as any).animationTime += dt * 0.5)
-    const positions = this.ocean.geometry.attributes.position
-    const basePositions = (this.ocean as any).basePositions
-
-    for (let i = 0; i < positions.count; i++) {
-      const x = basePositions[i * 3]
-      const z = basePositions[i * 3 + 2]
-      const wave1 = Math.sin(x * 0.15 + time) * 0.3
-      const wave2 = Math.sin(z * 0.1 + time * 0.8) * 0.2
-      positions.setY(i, basePositions[i * 3 + 1] + wave1 + wave2)
-    }
-    positions.needsUpdate = true
-  }
 }

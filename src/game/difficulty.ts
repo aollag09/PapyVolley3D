@@ -11,13 +11,13 @@ export interface AIDifficulty {
 
 export const DIFFICULTIES: Record<DifficultyLevel, AIDifficulty> = {
   easy: {
-    speed: BLOB_SPEED * 0.55,
+    speed: BLOB_SPEED * 0.35,
     jumpCooldown: 2.0,
     reactionDist: BLOB_RADIUS * 2.5,
     offsetX: BLOB_RADIUS * 0.3,
   },
   medium: {
-    speed: BLOB_SPEED * 1.0,
+    speed: BLOB_SPEED * 0.8,
     jumpCooldown: 1.2,
     reactionDist: BLOB_RADIUS * 3.5,
     offsetX: BLOB_RADIUS * 0.6,

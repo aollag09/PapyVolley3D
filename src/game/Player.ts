@@ -62,8 +62,8 @@ export class Player {
     const ey = R * 0.44
     const eyeSpread = R * 0.30
     const rWhite = R * 0.17
-    const rPupil = R * 0.10
-    const rShine = R * 0.04
+    const rPupil = R * 0.08
+    const rShine = R * 0.03
     const maxOff = rWhite * 0.48   // max pupil travel inside eyeball
 
     const whiteMat = new THREE.MeshLambertMaterial({ color: 0xffffff })
@@ -77,7 +77,7 @@ export class Player {
       this.object3D.add(white)
 
       // Pupil (starts centered on front face of eyeball)
-      const pupilBaseX = ex - side * rWhite * 0.65   // slightly in front of the white
+      const pupilBaseX = ex - side * rWhite * 0.55   // slightly in front of the white
       const pupil = new THREE.Mesh(new THREE.SphereGeometry(rPupil, 12, 12), blackMat)
       pupil.position.set(pupilBaseX, ey, ez)
       this.object3D.add(pupil)

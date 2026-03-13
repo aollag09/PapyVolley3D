@@ -158,9 +158,6 @@ export class GameEngine {
     this.player1.update(dt, this.keys, ballRef)
     this.player2.update(dt, this.keys, ballRef)
 
-    // Animate ocean waves
-    this.court.updateOcean(dt)
-
     // Update ball landing projection
     if (this.state === 'playing') {
       const blobs = [this.player1.position, this.player2.position]
@@ -234,7 +231,7 @@ export class GameEngine {
         this.ball.velocity.x -= (1 + r) * brelDot * fnx - player.velocity.x * 0.15
         this.ball.velocity.y -= (1 + r) * brelDot * fny - player.velocity.y * 0.15
         this.ball.velocity.z -= (1 + r) * brelDot * fnz - player.velocity.z * 0.15
-        const MAX_SPEED = 16
+        const MAX_SPEED = 20
         const speed = this.ball.velocity.length()
         if (speed > MAX_SPEED) this.ball.velocity.multiplyScalar(MAX_SPEED / speed)
 
