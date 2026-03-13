@@ -1,0 +1,88 @@
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.scoreboard {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 0.5rem 2rem;
+  border-radius: 8px;
+}
+
+.score {
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+}
+
+.team {
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.team.blue { color: #6af; }
+.team.red  { color: #f66; }
+
+.diff-bar {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.diff-btn {
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-family: inherit;
+  pointer-events: all;
+  opacity: 0.6;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+
+.diff-btn:hover { opacity: 0.9; }
+
+.diff-btn.active {
+  opacity: 1;
+  border-color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.15);
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 0.6rem 2rem;
+  border-radius: 8px;
+}
+
+.scored {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.prompt {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.gameover .scored {
+  font-size: 1.6rem;
+}
