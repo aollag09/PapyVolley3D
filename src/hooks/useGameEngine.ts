@@ -31,6 +31,8 @@ export function useGameEngine(canvasRef: RefObject<HTMLCanvasElement | null>) {
   }, [canvasRef])
 
   const setDifficulty = (d: DifficultyLevel) => engineRef.current?.setDifficulty(d)
+  const setJoystickKeys = (keys: Set<string>) => engineRef.current?.setJoystickKeys(keys)
+  const handleJoystickInput = () => engineRef.current?.handleJoystickInput()
 
-  return { status, setDifficulty }
+  return { status, setDifficulty, setJoystickKeys, handleJoystickInput }
 }

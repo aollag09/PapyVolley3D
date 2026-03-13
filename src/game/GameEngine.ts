@@ -54,6 +54,7 @@ export class GameEngine {
   private projectionRing: THREE.Mesh
 
   private keys = new Set<string>()
+  private joystickKeys = new Set<string>()
   private score: [number, number] = [0, 0]
   private state: GameState = 'waiting'
   private lastScorer: 1 | 2 | null = null
@@ -160,8 +161,11 @@ export class GameEngine {
   }
 
   private tick(dt: number) {
+    // Merge keyboard and joystick keys
+    const mergedKeys = new Set([...this.keys, ...this.joystickKeys])
+
     const ballRef = { position: this.ball.position, velocity: this.ball.velocity }
-    this.player1.update(dt, this.keys, ballRef)
+    this.player1.update(dt, mergedKeys, ballRef)
     this.player2.update(dt, this.keys, ballRef)
 
     // Update ball landing projection
@@ -304,6 +308,24 @@ export class GameEngine {
     this.difficulty = d
     this.player2.aiDifficulty = DIFFICULTIES[d]
     this.emit()
+  }
+
+  setJoystickKeys(keys: Set<string>) {
+    this.joystickKeys = new Set(keys)
+  }
+
+  handleJoystickInput() {
+    if (this.state === 'waiting') {
+      this.launchServe()
+    } else if (this.state === 'gameover') {
+      this.score = [0, 0]
+      this.winner = null
+      this.lastScorer = null
+      this.nextServer = 2
+      this.player1.reset()
+      this.player2.reset()
+      this.placeServe()
+    }
   }
 
   private emit() {

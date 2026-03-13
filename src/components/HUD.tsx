@@ -43,7 +43,7 @@ export default function HUD({ status, onDifficulty }: HUDProps) {
           {lastScorer !== null && (
             <div className="scored">{lastScorer === 1 ? 'You scored!' : 'CPU scored!'}</div>
           )}
-          <div className="prompt">Press any key to serve</div>
+          <div className="prompt">Press any key or tap JUMP to serve</div>
         </div>
       )}
 

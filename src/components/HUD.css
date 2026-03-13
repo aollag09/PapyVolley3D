@@ -101,3 +101,48 @@
 .gameover .scored {
   font-size: 1.6rem;
 }
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .hud {
+    position: fixed;
+    top: auto;
+    left: 20px;
+    right: auto;
+    width: auto;
+    padding-top: 0;
+    gap: 0;
+  }
+
+  .scoreboard {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    bottom: auto;
+    padding: 0.3rem 1rem;
+  }
+
+  .scoreboard-title {
+    display: none;
+  }
+
+  .score {
+    font-size: 1.2rem;
+  }
+
+  .team {
+    font-size: 0.7rem;
+  }
+
+  .diff-bar {
+    display: none;
+  }
+
+  .message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem 1.5rem;
+  }
+}
