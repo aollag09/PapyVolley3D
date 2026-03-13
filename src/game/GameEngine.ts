@@ -91,6 +91,12 @@ export class GameEngine {
     const sun = new THREE.DirectionalLight(0xffffff, 1.2)
     sun.position.set(5, 10, 5)
     sun.castShadow = true
+    sun.shadow.camera.left = -20
+    sun.shadow.camera.right = 20
+    sun.shadow.camera.top = 20
+    sun.shadow.camera.bottom = -20
+    sun.shadow.mapSize.width = 2048
+    sun.shadow.mapSize.height = 2048
     this.scene.add(sun)
 
     this.court = new Court()
