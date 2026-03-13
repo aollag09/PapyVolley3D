@@ -5,6 +5,7 @@ import { Player } from './Player'
 import { BLOB_RADIUS, BALL_RADIUS, WIN_SCORE } from './constants'
 import { DIFFICULTIES } from './difficulty'
 import type { DifficultyLevel } from './difficulty'
+import { predictBallLanding, createProjectionRing } from './BallProjection'
 
 export type GameState = 'waiting' | 'playing' | 'gameover'
 
@@ -50,6 +51,7 @@ export class GameEngine {
   private ball: Ball
   private player1: Player
   private player2: Player
+  private projectionRing: THREE.Mesh
 
   private keys = new Set<string>()
   private score: [number, number] = [0, 0]
@@ -70,7 +72,7 @@ export class GameEngine {
     this.scene = new THREE.Scene()
     this.scene.background = new THREE.Color(0x87ceeb)
 
-    this.camera = new THREE.PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 0.1, 200)
+    this.camera = new THREE.PerspectiveCamera(40, canvas.clientWidth / canvas.clientHeight, 0.1, 200)
     applyOrbit(this.camera)
 
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.6))
@@ -91,6 +93,9 @@ export class GameEngine {
     this.scene.add(this.player1.shadowMesh)
     this.scene.add(this.player2.object3D)
     this.scene.add(this.player2.shadowMesh)
+
+    this.projectionRing = createProjectionRing()
+    this.scene.add(this.projectionRing)
 
     this.placeServe()
 
@@ -140,6 +145,21 @@ export class GameEngine {
     const ballRef = { position: this.ball.position, velocity: this.ball.velocity }
     this.player1.update(dt, this.keys, ballRef)
     this.player2.update(dt, this.keys, ballRef)
+
+    // Update ball landing projection
+    if (this.state === 'playing') {
+      const blobs = [this.player1.position, this.player2.position]
+      const landing = predictBallLanding(ballRef, blobs)
+      if (landing) {
+        this.projectionRing.position.x = landing.position.x
+        this.projectionRing.position.z = landing.position.z
+        this.projectionRing.visible = !landing.onBlob
+      } else {
+        this.projectionRing.visible = false
+      }
+    } else {
+      this.projectionRing.visible = false
+    }
 
     if (this.state !== 'playing') return
 
@@ -286,6 +306,8 @@ export class GameEngine {
     canvas.removeEventListener('mouseup', this.onMouseUp)
     canvas.removeEventListener('mouseleave', this.onMouseUp)
     canvas.removeEventListener('wheel', this.onWheel)
+    ;(this.projectionRing.geometry as THREE.TorusGeometry).dispose()
+    ;(this.projectionRing.material as THREE.MeshBasicMaterial).dispose()
     this.renderer.dispose()
   }
 }
