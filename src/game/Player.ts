@@ -20,6 +20,13 @@ interface EyeData {
   maxOffset: number
 }
 
+interface EyebrowData {
+  mesh: THREE.Mesh
+  baseY: number
+  baseRotY: number
+  side: 1 | -1  // left or right eyebrow
+}
+
 export class Player {
   readonly object3D: THREE.Group
   readonly shadowMesh: THREE.Mesh
@@ -29,7 +36,9 @@ export class Player {
   readonly isAI: boolean
   private onGround = true
   private eyes: EyeData[] = []
+  private eyebrows: EyebrowData[] = []
   private jumpCooldown = 0
+  private ballHitTime = 0  // For ball hit expression
   aiDifficulty: AIDifficulty = DIFFICULTIES.medium
 
   constructor({ side, color, isAI = false }: PlayerOptions) {
@@ -81,6 +90,34 @@ export class Player {
       this.eyes.push({ pupil, baseX: pupilBaseX, baseY: ey, baseZ: ez, maxOffset: maxOff })
     }
 
+    // Eyebrows — fun and expressive! (aligned with eyes)
+    const browMat = new THREE.MeshLambertMaterial({ color: 0x333333 })
+    //const browWidth = R * 0.30
+    //const browHeight = R * 0.07
+    //const depth = R * 0.08;
+
+    const browWidth = R * 0.07
+    const browHeight = R * 0.07
+    const depth = R * 0.35;
+    let browSide = 1
+    for (const ez of [eyeSpread, -eyeSpread]) {
+      const brow = new THREE.Mesh(
+        new THREE.BoxGeometry(browWidth, browHeight, depth),
+        browMat,
+      )
+      const browY = ey + R * 0.09  // Just above the eyes
+      // Position brows slightly forward on the face for better visibility
+      const browX = ex + side * R * 0.15
+      brow.position.set(browX, browY, ez)
+      brow.rotation.z = browSide * 0.11  // neutral angle at rest
+      brow.rotation.x = browSide * 0.2
+      brow.rotation.y = browSide * 0.4
+      brow.castShadow = true
+      this.object3D.add(brow)
+      this.eyebrows.push({ mesh: brow, baseY: browY, baseRotY: browSide * 0.12, side: browSide as 1 | -1 })
+      browSide = -browSide
+    }
+
     // Shadow (separate, added to scene in GameEngine)
     this.shadowMesh = new THREE.Mesh(
       new THREE.CircleGeometry(BLOB_RADIUS * 0.85, 32),
@@ -105,6 +142,7 @@ export class Player {
     }
 
     if (this.jumpCooldown > 0) this.jumpCooldown -= dt
+    if (this.ballHitTime > 0) this.ballHitTime -= dt
 
     this.velocity.y -= GRAVITY * dt
     this.position.addScaledVector(this.velocity, dt)
@@ -141,6 +179,27 @@ export class Player {
           eye.baseZ + Math.max(-eye.maxOffset, Math.min(eye.maxOffset, dz * scale)),
         )
       }
+    }
+
+    // Animate eyebrows — fun expressions!
+    // Linear eyebrow lift based on current blob height
+    const maxJumpHeight = BLOB_JUMP_VEL * BLOB_JUMP_VEL / (2 * GRAVITY)
+    const heightRatio = Math.max(0, Math.min(1, this.position.y / maxJumpHeight))
+    const minLift = 0.3
+    const maxLift = 0.8
+    const baseJumpLift = minLift + (maxLift - minLift) * heightRatio
+
+    for (const brow of this.eyebrows) {
+      // Eyebrows follow the jump height smoothly
+      brow.mesh.position.y = brow.baseY + baseJumpLift
+
+      // Hit/Angry: eyebrows frowned together, lifted higher
+      const isFrowning = this.ballHitTime > 0
+      let targetRotY = brow.baseRotY
+      if (isFrowning) {
+        targetRotY = brow.side * 0.5  // More pronounced frown
+      }
+      brow.mesh.rotation.y += (targetRotY - brow.mesh.rotation.y) * 0.2
     }
 
     // Shadow
@@ -197,5 +256,9 @@ export class Player {
 
   reset() {
     this.moveTo(this.side * 3, 0)
+  }
+
+  onBallHit() {
+    this.ballHitTime = 0.2  // Show angry expression for 0.2 seconds
   }
 }

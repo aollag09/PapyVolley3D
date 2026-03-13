@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { COURT_X, COURT_Z, NET_HEIGHT, NET_THICKNESS } from './constants'
 
-function makeFloorTexture(): THREE.CanvasTexture {
+function makeSandTexture(): THREE.CanvasTexture {
   const W = 1024, H = 512
   const canvas = document.createElement('canvas')
   canvas.width = W; canvas.height = H
@@ -41,7 +41,7 @@ function makeFloorTexture(): THREE.CanvasTexture {
   const toU = (wx: number) => ((wx + COURT_X) / (COURT_X * 2)) * W
   const toV = (wz: number) => ((wz + COURT_Z) / (COURT_Z * 2)) * H
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.95)'
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'
   ctx.lineWidth = 5
 
   // Boundary
@@ -92,14 +92,46 @@ function makeNetTexture(): THREE.CanvasTexture {
   return new THREE.CanvasTexture(canvas)
 }
 
+function createPalmTree(position: THREE.Vector3): THREE.Group {
+  const tree = new THREE.Group()
+  tree.position.copy(position)
+
+  // Trunk
+  const trunkGeo = new THREE.CylinderGeometry(0.4, 0.5, 8, 8)
+  const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8b5a2b })
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat)
+  trunk.position.y = 4
+  trunk.castShadow = true
+  tree.add(trunk)
+
+  // Foliage (sphere clusters)
+  const foliageColors = [0x2d5016, 0x3d6b1f, 0x4a7c2e]
+  for (let i = 0; i < 3; i++) {
+    const foliageGeo = new THREE.SphereGeometry(2.5, 8, 8)
+    const foliageMat = new THREE.MeshLambertMaterial({ color: foliageColors[i % 3] })
+    const foliage = new THREE.Mesh(foliageGeo, foliageMat)
+    foliage.position.set(
+      Math.cos((i / 3) * Math.PI * 2) * 1.2,
+      8 + i * 0.5,
+      Math.sin((i / 3) * Math.PI * 2) * 1.2
+    )
+    foliage.castShadow = true
+    tree.add(foliage)
+  }
+
+  return tree
+}
+
+
 export class Court {
   readonly object3D: THREE.Group
+  readonly ocean: THREE.Mesh | null
 
   constructor() {
     this.object3D = new THREE.Group()
 
-    // Floor with wood + court line texture
-    const floorTex = makeFloorTexture()
+    // Floor with sand texture
+    const floorTex = makeSandTexture()
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(COURT_X * 2, COURT_Z * 2),
       new THREE.MeshLambertMaterial({ map: floorTex }),
@@ -108,12 +140,24 @@ export class Court {
     floor.receiveShadow = true
     this.object3D.add(floor)
 
+    // Palmiers around the court
+    const palmPositions = [
+      new THREE.Vector3(-20, 0, -25),
+      new THREE.Vector3(20, 0, -25),
+      new THREE.Vector3(-25, 0, 25),
+      new THREE.Vector3(25, 0, 25),
+      new THREE.Vector3(-18, 0, 20),
+      new THREE.Vector3(18, 0, 20),
+    ]
+    for (const pos of palmPositions) {
+      this.object3D.add(createPalmTree(pos))
+    }
+
     // ── Net ──────────────────────────────────────────────────────
     const netTex = makeNetTexture()
     netTex.wrapS = THREE.RepeatWrapping
-    netTex.repeat.set(COURT_Z * 2 / 2, 1)   // tile horizontally
+    netTex.repeat.set(COURT_Z * 2 / 2, 1)
 
-    // Main net mesh (double-sided plane)
     const netMesh = new THREE.Mesh(
       new THREE.PlaneGeometry(COURT_Z * 2, NET_HEIGHT),
       new THREE.MeshBasicMaterial({ map: netTex, side: THREE.DoubleSide, transparent: true }),
@@ -138,12 +182,28 @@ export class Court {
       this.object3D.add(post)
     }
 
-    // Side boundary walls (very short, just for looks)
+    // Side boundary walls
     const wallMat = new THREE.MeshLambertMaterial({ color: 0x888866, transparent: true, opacity: 0.18 })
     for (const z of [-COURT_Z, COURT_Z]) {
       const wall = new THREE.Mesh(new THREE.BoxGeometry(COURT_X * 2, 0.12, 0.04), wallMat)
       wall.position.set(0, 0.06, z)
       this.object3D.add(wall)
     }
+  }
+
+  updateOcean(dt: number) {
+    if (!this.ocean) return
+    const time = ((this.ocean as any).animationTime += dt * 0.5)
+    const positions = this.ocean.geometry.attributes.position
+    const basePositions = (this.ocean as any).basePositions
+
+    for (let i = 0; i < positions.count; i++) {
+      const x = basePositions[i * 3]
+      const z = basePositions[i * 3 + 2]
+      const wave1 = Math.sin(x * 0.15 + time) * 0.3
+      const wave2 = Math.sin(z * 0.1 + time * 0.8) * 0.2
+      positions.setY(i, basePositions[i * 3 + 1] + wave1 + wave2)
+    }
+    positions.needsUpdate = true
   }
 }

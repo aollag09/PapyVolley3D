@@ -70,7 +70,19 @@ export class GameEngine {
     this.renderer.shadowMap.enabled = true
 
     this.scene = new THREE.Scene()
-    this.scene.background = new THREE.Color(0x87ceeb)
+    // Beach sunset sky — gradient from blue to orange
+    const gradCanvas = document.createElement('canvas')
+    gradCanvas.width = 256
+    gradCanvas.height = 256
+    const gradCtx = gradCanvas.getContext('2d')!
+    const grad = gradCtx.createLinearGradient(0, 0, 0, 256)
+    grad.addColorStop(0, '#87ceeb')      // Sky blue at top
+    grad.addColorStop(0.5, '#ffcc99')    // Peachy mid
+    grad.addColorStop(1, '#ff9966')      // Orange at horizon
+    gradCtx.fillStyle = grad
+    gradCtx.fillRect(0, 0, 256, 256)
+    const gradTex = new THREE.CanvasTexture(gradCanvas)
+    this.scene.background = gradTex
 
     this.camera = new THREE.PerspectiveCamera(40, canvas.clientWidth / canvas.clientHeight, 0.1, 200)
     applyOrbit(this.camera)
@@ -145,6 +157,9 @@ export class GameEngine {
     const ballRef = { position: this.ball.position, velocity: this.ball.velocity }
     this.player1.update(dt, this.keys, ballRef)
     this.player2.update(dt, this.keys, ballRef)
+
+    // Animate ocean waves
+    this.court.updateOcean(dt)
 
     // Update ball landing projection
     if (this.state === 'playing') {
@@ -222,6 +237,9 @@ export class GameEngine {
         const MAX_SPEED = 16
         const speed = this.ball.velocity.length()
         if (speed > MAX_SPEED) this.ball.velocity.multiplyScalar(MAX_SPEED / speed)
+
+        // Fun expression when hitting the ball!
+        player.onBallHit()
       }
     }
   }
