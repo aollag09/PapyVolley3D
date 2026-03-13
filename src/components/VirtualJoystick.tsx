@@ -45,21 +45,31 @@ export default function VirtualJoystick({ onKeysChange, onJumpPress }: VirtualJo
 
     knobRef.current.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
 
-    // Determine direction (with deadzone)
+    // Determine direction (more sensitive with lower deadzone)
     const keys = keysRef.current
     keys.clear()
 
-    if (ratio > 0.3) {
-      if (angle > -Math.PI * 0.625 && angle < -Math.PI * 0.375) {
-        keys.add('ArrowUp')
-      } else if (angle > Math.PI * 0.375 && angle < Math.PI * 0.625) {
-        keys.add('ArrowDown')
+    if (ratio > 0.2) {  // Lower deadzone for better responsiveness
+      // Use vector components for smoother direction detection
+      const dx = Math.cos(angle)
+      const dy = Math.sin(angle)
+
+      // Detect primarily horizontal movement
+      if (Math.abs(dx) > Math.abs(dy) * 0.5) {
+        if (dx > 0) {
+          keys.add('ArrowRight')
+        } else {
+          keys.add('ArrowLeft')
+        }
       }
 
-      if (angle > -Math.PI * 0.125 && angle < Math.PI * 0.125) {
-        keys.add('ArrowRight')
-      } else if (Math.abs(angle) > Math.PI * 0.875) {
-        keys.add('ArrowLeft')
+      // Detect primarily vertical movement
+      if (Math.abs(dy) > Math.abs(dx) * 0.5) {
+        if (dy < 0) {
+          keys.add('ArrowUp')
+        } else {
+          keys.add('ArrowDown')
+        }
       }
     }
 

@@ -73,4 +73,21 @@
   background: radial-gradient(circle at 30% 30%, rgba(255, 120, 120, 0.95), rgba(220, 70, 70, 0.85));
 }
 
-/* Visible on all devices for testing */
+/* Mobile optimizations - larger touch targets */
+@media (max-width: 768px) {
+  .joystick {
+    width: 140px;
+    height: 140px;
+  }
+
+  .joystick-knob {
+    width: 60px;
+    height: 60px;
+  }
+
+  .jump-btn {
+    width: 100px;
+    height: 100px;
+    font-size: 16px;
+  }
+}
