@@ -45,11 +45,14 @@ export default function VirtualJoystick({ onKeysChange, onJumpPress }: VirtualJo
 
     knobRef.current.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
 
-    // Determine direction with balanced deadzone
+    // Determine direction - higher deadzone on mobile
     const keys = keysRef.current
     keys.clear()
 
-    if (ratio > 0.25) {  // Balanced deadzone
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    const deadzone = isMobile ? 0.325 : 0.25  // 30% more deadzone on mobile
+
+    if (ratio > deadzone) {
       // Use vector components for smoother direction detection
       const dx = Math.cos(angle)
       const dy = Math.sin(angle)

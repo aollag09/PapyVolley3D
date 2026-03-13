@@ -154,7 +154,6 @@ export class GameEngine {
 
   start() {
     this.lastTime = performance.now()
-    let frameCount = 0
     const loop = (t: number) => {
       try {
         this.rafId = requestAnimationFrame(loop)
@@ -162,18 +161,6 @@ export class GameEngine {
         this.lastTime = t
         this.tick(dt)
         this.renderer.render(this.scene, this.camera)
-
-        // Log memory every 60 frames
-        frameCount++
-        if (frameCount % 60 === 0) {
-          if ((performance as any).memory) {
-            const mem = (performance as any).memory
-            const used = (mem.usedJSHeapSize / 1048576).toFixed(1)
-            const total = (mem.totalJSHeapSize / 1048576).toFixed(1)
-            const limit = (mem.jsHeapSizeLimit / 1048576).toFixed(1)
-            console.log(`💾 Memory: ${used}MB / ${total}MB (limit: ${limit}MB)`)
-          }
-        }
       } catch (error) {
         console.error('❌ Game loop error:', error)
         // Show error on screen
