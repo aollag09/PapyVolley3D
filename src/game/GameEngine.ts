@@ -324,11 +324,31 @@ export class GameEngine {
     applyOrbit(this.camera)
   }
 
+  private resizeTimeout: ReturnType<typeof setTimeout> | null = null
+
   private onResize = () => {
-    const canvas = this.renderer.domElement
-    this.camera.aspect = canvas.clientWidth / canvas.clientHeight
-    this.camera.updateProjectionMatrix()
-    this.renderer.setSize(canvas.clientWidth, canvas.clientHeight)
+    // Debounce resize events
+    if (this.resizeTimeout !== null) {
+      clearTimeout(this.resizeTimeout)
+    }
+
+    this.resizeTimeout = setTimeout(() => {
+      const canvas = this.renderer.domElement
+      const width = canvas.clientWidth
+      const height = canvas.clientHeight
+
+      // Update camera
+      this.camera.aspect = width / height
+      this.camera.updateProjectionMatrix()
+
+      // Update renderer with proper pixel ratio
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const pixelRatio = isMobile ? Math.min(window.devicePixelRatio, 1.5) : window.devicePixelRatio
+      this.renderer.setPixelRatio(pixelRatio)
+      this.renderer.setSize(width, height)
+
+      this.resizeTimeout = null
+    }, 300)
   }
 
   setDifficulty(d: DifficultyLevel) {
@@ -367,6 +387,7 @@ export class GameEngine {
 
   dispose() {
     if (this.rafId !== null) cancelAnimationFrame(this.rafId)
+    if (this.resizeTimeout !== null) clearTimeout(this.resizeTimeout)
     const canvas = this.renderer.domElement
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('keyup', this.onKeyUp)
