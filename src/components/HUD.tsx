@@ -18,9 +18,12 @@ export default function HUD({ status, onDifficulty }: HUDProps) {
   return (
     <div className="hud">
       <div className="scoreboard">
-        <span className="team blue">You</span>
-        <span className="score">{score[0]} – {score[1]}</span>
-        <span className="team red">CPU</span>
+        <div className="scoreboard-title">Papy Volley</div>
+        <div className="scoreboard-content">
+          <span className="team blue">You</span>
+          <span className="score">{score[0]} – {score[1]}</span>
+          <span className="team red">CPU</span>
+        </div>
       </div>
 
       <div className="diff-bar">
