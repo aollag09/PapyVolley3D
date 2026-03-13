@@ -45,11 +45,11 @@ export default function VirtualJoystick({ onKeysChange, onJumpPress }: VirtualJo
 
     knobRef.current.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
 
-    // Determine direction (more sensitive with lower deadzone)
+    // Determine direction with balanced deadzone
     const keys = keysRef.current
     keys.clear()
 
-    if (ratio > 0.2) {  // Lower deadzone for better responsiveness
+    if (ratio > 0.25) {  // Balanced deadzone
       // Use vector components for smoother direction detection
       const dx = Math.cos(angle)
       const dy = Math.sin(angle)
