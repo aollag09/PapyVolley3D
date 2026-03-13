@@ -60,34 +60,48 @@ function makeSandTexture(): THREE.CanvasTexture {
   return new THREE.CanvasTexture(canvas)
 }
 
-function makeNetTexture(): THREE.CanvasTexture {
-  const W = 1024, H = 256
+function makeWallTexture(): THREE.CanvasTexture {
+  const W = 1024, H = 512
   const canvas = document.createElement('canvas')
   canvas.width = W; canvas.height = H
   const ctx = canvas.getContext('2d')!
 
-  ctx.clearRect(0, 0, W, H)
+  // Red brick base color
+  ctx.fillStyle = '#c84c3c'
+  ctx.fillRect(0, 0, W, H)
 
-  // Diamond net pattern
-  const cellW = 32, cellH = 32
-  ctx.strokeStyle = 'rgba(230,230,230,0.9)'
-  ctx.lineWidth = 2
+  // Brick pattern with alternating rows (larger for less visible repetition)
+  const brickW = 128, brickH = 64
+  const brickRows = Math.ceil(H / brickH)
+  const bricksPerRow = Math.ceil(W / brickW)
 
-  // Diagonal lines ↗
-  for (let i = -H; i < W + H; i += cellW) {
-    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke()
+  for (let row = 0; row < brickRows; row++) {
+    const offsetX = (row % 2) * (brickW / 2)
+    for (let col = 0; col < bricksPerRow + 1; col++) {
+      const x = col * brickW + offsetX
+      const y = row * brickH
+
+      // Red brick color variation
+      const shade = Math.random() * 0.1
+      ctx.fillStyle = `hsl(10, 55%, ${40 + shade * 100}%)`
+      ctx.fillRect(x, y, brickW - 2, brickH - 2)
+
+      // Brick border (grout)
+      ctx.strokeStyle = 'rgba(200, 180, 170, 0.4)'
+      ctx.lineWidth = 2
+      ctx.strokeRect(x, y, brickW - 2, brickH - 2)
+
+      // Subtle texture within brick
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+      for (let i = 0; i < 8; i++) {
+        const px = x + Math.random() * (brickW - 2)
+        const py = y + Math.random() * (brickH - 2)
+        ctx.beginPath()
+        ctx.arc(px, py, Math.random() * 2, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
   }
-  // Diagonal lines ↘
-  for (let i = -H; i < W + H; i += cellH) {
-    ctx.beginPath(); ctx.moveTo(i, H); ctx.lineTo(i + H, 0); ctx.stroke()
-  }
-
-  // Top tape (white band)
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, W, 18)
-
-  // Bottom edge
-  ctx.fillRect(0, H - 6, W, 6)
 
   return new THREE.CanvasTexture(canvas)
 }
@@ -111,34 +125,28 @@ export class Court {
    
 
 
-    // ── Net ──────────────────────────────────────────────────────
-    const netTex = makeNetTexture()
-    netTex.wrapS = THREE.RepeatWrapping
-    netTex.repeat.set(COURT_Z * 2 / 2, 1)
+    // ── Wall ──────────────────────────────────────────────────────
+    const wallTex = makeWallTexture()
+    wallTex.wrapS = THREE.RepeatWrapping
+    wallTex.wrapT = THREE.RepeatWrapping
+    wallTex.repeat.set(COURT_Z * 2 / 4, NET_HEIGHT / 4)
 
-    const netMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(COURT_Z * 2, NET_HEIGHT),
-      new THREE.MeshBasicMaterial({ map: netTex, side: THREE.DoubleSide, transparent: true }),
-    )
-    netMesh.rotation.y = Math.PI / 2
-    netMesh.position.y = NET_HEIGHT / 2
-    this.object3D.add(netMesh)
+    const wallGeo = new THREE.BoxGeometry(NET_THICKNESS, NET_HEIGHT, COURT_Z * 2)
+    const netWallMat = new THREE.MeshLambertMaterial({ map: wallTex })
+    const wall = new THREE.Mesh(wallGeo, netWallMat)
+    wall.position.y = NET_HEIGHT / 2
+    wall.castShadow = true
+    wall.receiveShadow = true
+    this.object3D.add(wall)
 
-    // Top tape rope
-    const tapeGeo = new THREE.BoxGeometry(NET_THICKNESS + 0.05, 0.08, COURT_Z * 2)
-    const tapeMat = new THREE.MeshLambertMaterial({ color: 0xeeeeee })
-    const tape = new THREE.Mesh(tapeGeo, tapeMat)
-    tape.position.y = NET_HEIGHT
-    this.object3D.add(tape)
-
-    // Side posts
-    const postGeo = new THREE.CylinderGeometry(0.06, 0.06, NET_HEIGHT + 0.4, 10)
-    const postMat = new THREE.MeshLambertMaterial({ color: 0x999999 })
-    for (const z of [-COURT_Z, COURT_Z]) {
-      const post = new THREE.Mesh(postGeo, postMat)
-      post.position.set(0, (NET_HEIGHT + 0.4) / 2, z)
-      this.object3D.add(post)
-    }
+    // Top cap with brick texture
+    const capGeo = new THREE.BoxGeometry(NET_THICKNESS, 0.2, COURT_Z * 2)
+    const capMat = new THREE.MeshLambertMaterial({ map: wallTex })
+    const cap = new THREE.Mesh(capGeo, capMat)
+    cap.position.y = NET_HEIGHT
+    cap.castShadow = true
+    cap.receiveShadow = true
+    this.object3D.add(cap)
 
     // Side boundary walls
     const wallMat = new THREE.MeshLambertMaterial({ color: 0x888866, transparent: true, opacity: 0.18 })
