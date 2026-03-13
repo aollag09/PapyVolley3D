@@ -65,13 +65,13 @@ export class GameEngine {
   onStatusChange: ((s: GameStatus) => void) | null = null
 
   constructor(canvas: HTMLCanvasElement) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
-    // Limit pixel ratio on mobile to avoid VRAM exhaustion
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile })
     const pixelRatio = isMobile ? Math.min(window.devicePixelRatio, 1.5) : window.devicePixelRatio
     this.renderer.setPixelRatio(pixelRatio)
     this.renderer.setSize(canvas.clientWidth, canvas.clientHeight)
-    this.renderer.shadowMap.enabled = true
+    // Disable shadows on mobile
+    this.renderer.shadowMap.enabled = !isMobile
 
     this.scene = new THREE.Scene()
     // Beach sunset sky — gradient from blue to orange
@@ -93,13 +93,15 @@ export class GameEngine {
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.6))
     const sun = new THREE.DirectionalLight(0xffffff, 1.2)
     sun.position.set(5, 10, 5)
-    sun.castShadow = true
-    sun.shadow.camera.left = -20
-    sun.shadow.camera.right = 20
-    sun.shadow.camera.top = 20
-    sun.shadow.camera.bottom = -20
-    sun.shadow.mapSize.width = 2048
-    sun.shadow.mapSize.height = 2048
+    sun.castShadow = !isMobile
+    if (!isMobile) {
+      sun.shadow.camera.left = -20
+      sun.shadow.camera.right = 20
+      sun.shadow.camera.top = 20
+      sun.shadow.camera.bottom = -20
+      sun.shadow.mapSize.width = 2048
+      sun.shadow.mapSize.height = 2048
+    }
     this.scene.add(sun)
 
     this.court = new Court()
