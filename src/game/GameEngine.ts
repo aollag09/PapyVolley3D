@@ -156,22 +156,45 @@ export class GameEngine {
     this.lastTime = performance.now()
     let frameCount = 0
     const loop = (t: number) => {
-      this.rafId = requestAnimationFrame(loop)
-      const dt = Math.min((t - this.lastTime) / 1000, 0.05)
-      this.lastTime = t
-      this.tick(dt)
-      this.renderer.render(this.scene, this.camera)
+      try {
+        this.rafId = requestAnimationFrame(loop)
+        const dt = Math.min((t - this.lastTime) / 1000, 0.05)
+        this.lastTime = t
+        this.tick(dt)
+        this.renderer.render(this.scene, this.camera)
 
-      // Log memory every 60 frames
-      frameCount++
-      if (frameCount % 60 === 0) {
-        if ((performance as any).memory) {
-          const mem = (performance as any).memory
-          const used = (mem.usedJSHeapSize / 1048576).toFixed(1)
-          const total = (mem.totalJSHeapSize / 1048576).toFixed(1)
-          const limit = (mem.jsHeapSizeLimit / 1048576).toFixed(1)
-          console.log(`💾 Memory: ${used}MB / ${total}MB (limit: ${limit}MB)`)
+        // Log memory every 60 frames
+        frameCount++
+        if (frameCount % 60 === 0) {
+          if ((performance as any).memory) {
+            const mem = (performance as any).memory
+            const used = (mem.usedJSHeapSize / 1048576).toFixed(1)
+            const total = (mem.totalJSHeapSize / 1048576).toFixed(1)
+            const limit = (mem.jsHeapSizeLimit / 1048576).toFixed(1)
+            console.log(`💾 Memory: ${used}MB / ${total}MB (limit: ${limit}MB)`)
+          }
         }
+      } catch (error) {
+        console.error('❌ Game loop error:', error)
+        // Show error on screen
+        const errorDiv = document.createElement('div')
+        errorDiv.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0,0,0,0.95);
+          color: #f44;
+          padding: 20px;
+          border-radius: 8px;
+          z-index: 10000;
+          font-family: monospace;
+          max-width: 80%;
+          overflow: auto;
+          max-height: 80%;
+        `
+        errorDiv.innerHTML = `<div style="color: #fff; margin-bottom: 10px;">❌ GAME CRASHED</div><div>${String(error)}</div>`
+        document.body.appendChild(errorDiv)
       }
     }
     this.rafId = requestAnimationFrame(loop)
