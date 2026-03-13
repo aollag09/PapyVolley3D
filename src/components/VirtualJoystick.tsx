@@ -16,16 +16,8 @@ export default function VirtualJoystick({ onKeysChange, onJumpPress }: VirtualJo
     onKeysChange(new Set(keysRef.current))
   }, [onKeysChange])
 
-  const handleJoystickStart = useCallback((e: React.TouchEvent) => {
-    if (touchIdRef.current !== null) return
-    const touch = e.touches[0]
-    touchIdRef.current = touch.identifier
-    // Call onJumpPress to trigger serve if waiting
-    onJumpPress?.()
-    handleJoystickMove(touch)
-  }, [onJumpPress, handleJoystickMove])
 
-  const handleJoystickMove = useCallback((touch: Touch) => {
+  const handleJoystickMove = useCallback((touch: { clientX: number; clientY: number }) => {
     if (!joystickRef.current || !knobRef.current) return
 
     const rect = joystickRef.current.getBoundingClientRect()
@@ -64,6 +56,16 @@ export default function VirtualJoystick({ onKeysChange, onJumpPress }: VirtualJo
 
     updateKeys()
   }, [updateKeys])
+
+  const handleJoystickStart = useCallback((e: React.TouchEvent) => {
+    if (touchIdRef.current !== null) return
+    const touch = e.touches[0]
+    touchIdRef.current = touch.identifier
+    // Call onJumpPress to trigger serve if waiting
+    onJumpPress?.()
+    handleJoystickMove(touch)
+  }, [onJumpPress, handleJoystickMove])
+
 
   const handleJoystickEnd = useCallback(() => {
     if (knobRef.current) {

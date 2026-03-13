@@ -20,10 +20,10 @@ export interface GameStatus {
 export type { DifficultyLevel }
 
 // ── Orbit camera state ────────────────────────────────────────────
-const TARGET = new THREE.Vector3(0, 1, 0)
+const TARGET = new THREE.Vector3(-2.5, 0.5, -1.5)
 const orbit = {
   theta: -0.5,      // horizontal angle (radians)
-  phi: 0.72,        // vertical angle (radians, 0=top π=bottom)
+  phi: 0.90,        // vertical angle (radians, 0=top π=bottom)
   radius: 28,
   dragging: false,
   lastX: 0,

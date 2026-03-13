@@ -61,7 +61,7 @@ export class Player {
     const ex = -side * R * 0.50
     const ey = R * 0.44
     const eyeSpread = R * 0.30
-    const rWhite = R * 0.17
+    const rWhite = R * 0.20
     const rPupil = R * 0.08
     const rShine = R * 0.03
     const maxOff = rWhite * 0.48   // max pupil travel inside eyeball
