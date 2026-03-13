@@ -66,7 +66,10 @@ export class GameEngine {
 
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
-    this.renderer.setPixelRatio(window.devicePixelRatio)
+    // Limit pixel ratio on mobile to avoid VRAM exhaustion
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    const pixelRatio = isMobile ? Math.min(window.devicePixelRatio, 1.5) : window.devicePixelRatio
+    this.renderer.setPixelRatio(pixelRatio)
     this.renderer.setSize(canvas.clientWidth, canvas.clientHeight)
     this.renderer.shadowMap.enabled = true
 
@@ -87,7 +90,6 @@ export class GameEngine {
 
     this.camera = new THREE.PerspectiveCamera(40, canvas.clientWidth / canvas.clientHeight, 0.1, 200)
     applyOrbit(this.camera)
-
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.6))
     const sun = new THREE.DirectionalLight(0xffffff, 1.2)
     sun.position.set(5, 10, 5)
@@ -150,12 +152,25 @@ export class GameEngine {
 
   start() {
     this.lastTime = performance.now()
+    let frameCount = 0
     const loop = (t: number) => {
       this.rafId = requestAnimationFrame(loop)
       const dt = Math.min((t - this.lastTime) / 1000, 0.05)
       this.lastTime = t
       this.tick(dt)
       this.renderer.render(this.scene, this.camera)
+
+      // Log memory every 60 frames
+      frameCount++
+      if (frameCount % 60 === 0) {
+        if ((performance as any).memory) {
+          const mem = (performance as any).memory
+          const used = (mem.usedJSHeapSize / 1048576).toFixed(1)
+          const total = (mem.totalJSHeapSize / 1048576).toFixed(1)
+          const limit = (mem.jsHeapSizeLimit / 1048576).toFixed(1)
+          console.log(`💾 Memory: ${used}MB / ${total}MB (limit: ${limit}MB)`)
+        }
+      }
     }
     this.rafId = requestAnimationFrame(loop)
   }
