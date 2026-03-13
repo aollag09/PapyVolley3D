@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import './VirtualJoystick.css'
 
 interface VirtualJoystickProps {
@@ -7,6 +7,24 @@ interface VirtualJoystickProps {
 }
 
 export default function VirtualJoystick({ onKeysChange, onJumpPress }: VirtualJoystickProps) {
+  // Only show joystick on touch devices
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
+
+  useEffect(() => {
+    // Check if device supports touch
+    const hasTouch = () => {
+      return (
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        (navigator as any).msMaxTouchPoints > 0
+      )
+    }
+    setIsTouchDevice(hasTouch())
+  }, [])
+
+  if (!isTouchDevice) {
+    return null
+  }
   const joystickRef = useRef<HTMLDivElement>(null)
   const knobRef = useRef<HTMLDivElement>(null)
   const keysRef = useRef<Set<string>>(new Set())

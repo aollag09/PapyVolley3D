@@ -112,7 +112,7 @@ export class Player {
       brow.rotation.z = browSide * 0.11  // neutral angle at rest
       brow.rotation.x = browSide * 0.2
       brow.rotation.y = browSide * 0.4
-      brow.castShadow = true
+      brow.castShadow = false
       this.object3D.add(brow)
       this.eyebrows.push({ mesh: brow, baseY: browY, baseRotY: browSide * 0.12, side: browSide as 1 | -1 })
       browSide = -browSide

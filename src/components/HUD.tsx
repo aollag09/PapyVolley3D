@@ -18,24 +18,26 @@ export default function HUD({ status, onDifficulty }: HUDProps) {
   return (
     <div className="hud">
       <div className="scoreboard">
-        <div className="scoreboard-title">Papy Volley 3D</div>
-        <div className="scoreboard-content">
-          <span className="team blue">You</span>
-          <span className="score">{score[0]} – {score[1]}</span>
-          <span className="team red">CPU</span>
+        <div className="scoreboard-left">
+          <div className="scoreboard-title">Papy Volley 3D</div>
+          <div className="scoreboard-content">
+            <span className="team blue">You</span>
+            <span className="score">{score[0]} – {score[1]}</span>
+            <span className="team red">CPU</span>
+          </div>
         </div>
-      </div>
 
-      <div className="diff-bar">
-        {(['easy', 'medium', 'hard'] as DifficultyLevel[]).map(d => (
-          <button
-            key={d}
-            className={`diff-btn ${difficulty === d ? 'active' : ''}`}
-            onClick={() => onDifficulty(d)}
-          >
-            {DIFF_LABELS[d]}
-          </button>
-        ))}
+        <div className="diff-bar">
+          {(['easy', 'medium', 'hard'] as DifficultyLevel[]).map(d => (
+            <button
+              key={d}
+              className={`diff-btn ${difficulty === d ? 'active' : ''}`}
+              onClick={() => onDifficulty(d)}
+            >
+              {DIFF_LABELS[d]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {state === 'waiting' && (

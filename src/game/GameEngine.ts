@@ -168,8 +168,8 @@ export class GameEngine {
     this.player1.update(dt, mergedKeys, ballRef)
     this.player2.update(dt, this.keys, ballRef)
 
-    // Update ball landing projection
-    if (this.state === 'playing') {
+    // Update ball landing projection (hidden in hard mode)
+    if (this.state === 'playing' && this.difficulty !== 'hard') {
       const blobs = [this.player1.position, this.player2.position]
       const landing = predictBallLanding(ballRef, blobs)
       if (landing) {
