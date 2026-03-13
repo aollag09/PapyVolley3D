@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">papy-volley-3d</string>
+    <string name="title_activity_main">papy-volley-3d</string>
+    <string name="package_name">com.papyvolley.game</string>
+    <string name="custom_url_scheme">com.papyvolley.game</string>
+</resources>

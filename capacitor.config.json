@@ -1,0 +1,6 @@
+{
+  "appId": "com.papyvolley.game",
+  "appName": "papy-volley-3d",
+  "webDir": "dist", 
+  "bundledWebRuntime": false
+}

@@ -16,7 +16,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    /* If you want to keep this true, you MUST have the vite-env.d.ts file */
+    "noUncheckedSideEffectImports": true 
   },
-  "include": ["src"]
+  "include": ["src", "src/**/*.d.ts"] 
 }
